@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cấu hình Văn bản AI - MS Word Addin</title>
+    <!-- KHAI BÁO THƯ VIỆN MICROSOFT OFFICE JS -->
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
     <style>
@@ -16,6 +17,8 @@
             --border-color: #333333;
             --accent-red: #ef4444;
             --accent-red-hover: #dc2626;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -39,27 +42,27 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 20px;
             background-color: var(--bg-main);
             position: relative;
+            overflow-y: auto;
         }
 
         .paper-preview {
             width: 100%;
             max-width: 650px;
-            aspect-ratio: 1 / 1.414;
+            min-height: 850px;
             background-color: #1a1a1a;
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            padding: 40px;
+            padding: 50px 60px;
             color: var(--text-main);
             font-family: 'Times New Roman', serif;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            overflow-y: hidden;
+            margin-bottom: 20px;
         }
 
-        .ai-warning { margin-top: 20px; font-size: 12px; color: var(--text-muted); text-align: center; }
+        .ai-warning { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 20px; }
 
         /* Style bên trong tờ giấy Preview */
         .pv-header { display: flex; width: 100%; margin-bottom: 30px; }
@@ -68,6 +71,8 @@
         .pv-line { height: 1px; background-color: var(--text-main); margin: 5px auto; }
         .pv-title { text-align: center; margin: 30px 0; }
         .pv-footer { display: flex; width: 100%; margin-top: 50px; }
+        
+        .pv-content-p { text-indent: 30px; text-align: justify; margin-bottom: 6px; line-height: 1.5; font-size: 14px; }
 
         /* KHU VỰC BÊN PHẢI: CONFIG */
         .config-section {
@@ -81,20 +86,22 @@
 
         /* Tabs */
         .tabs { display: flex; border-bottom: 1px solid var(--border-color); background-color: var(--bg-main); }
-        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; color: var(--text-muted); cursor: pointer; font-weight: 500; text-transform: uppercase; }
-        .tab.active { color: var(--accent-red); border-bottom: 2px solid var(--accent-red); }
+        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; color: var(--text-muted); cursor: pointer; font-weight: 600; text-transform: uppercase; transition: 0.2s; }
+        .tab.active { color: var(--accent-red); border-bottom: 2px solid var(--accent-red); background-color: var(--bg-panel); }
+        .tab:hover:not(.active) { color: white; background-color: #222; }
 
         /* Form Content */
-        .form-content { flex: 1; padding: 24px; overflow-y: auto; }
+        .form-content { flex: 1; padding: 24px; overflow-y: auto; display: none; }
+        .form-content.active { display: block; }
+
         .section-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: white; }
         .row { display: flex; gap: 15px; margin-bottom: 15px; }
         .col { flex: 1; }
 
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
-        .form-group p.desc { font-size: 11px; color: #666; margin-top: 4px; }
 
-        .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 12px; border-radius: 4px; font-size: 13px; outline: none; transition: border 0.2s; }
+        .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 12px; border-radius: 4px; font-size: 13px; outline: none; transition: border 0.2s; resize: vertical; }
         .form-control:focus { border-color: var(--accent-red); }
         select.form-control { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a3a3a3%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 12px top 50%; background-size: 10px auto; }
 
@@ -106,27 +113,36 @@
 
         /* Slider */
         .slider-container { margin: 20px 0; }
-        .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
         .slider-value { text-align: center; color: var(--accent-red); font-size: 12px; font-weight: bold; margin-top: 8px; }
         input[type=range] { width: 100%; -webkit-appearance: none; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--accent-red); cursor: pointer; margin-top: -6px; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--border-color); border-radius: 2px; }
 
-        /* Nút chính */
-        .footer-action { padding: 20px 24px; border-top: 1px solid var(--border-color); background: var(--bg-main); }
-        .btn-primary { width: 100%; background-color: var(--accent-red); color: white; border: none; padding: 14px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        /* Footer Action Buttons */
+        .footer-action { padding: 15px 24px; border-top: 1px solid var(--border-color); background: var(--bg-main); display: flex; gap: 10px; flex-direction: column; }
+        .btn { width: 100%; border: none; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; color: white; }
+        .btn-primary { background-color: var(--accent-red); }
         .btn-primary:hover { background-color: var(--accent-red-hover); }
+        .btn-secondary { background-color: #334155; }
+        .btn-secondary:hover { background-color: #475569; }
+        .btn-ai { background-color: var(--accent-blue); padding: 14px; font-size: 14px; margin-top: 10px; }
+        .btn-ai:hover { background-color: var(--accent-blue-hover); }
 
-        /* Khi hiển thị trong Word Taskpane (Màn hình nhỏ) */
+        /* Loading Spinner */
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 16px; height: 16px; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         @media (max-width: 800px) {
-            .preview-section { display: none; } /* Ẩn tờ giấy đen vì bản thân MS Word đã là giấy trắng rồi */
+            .preview-section { display: none; }
             .config-section { width: 100%; border-left: none; }
         }
     </style>
 </head>
 <body>
 
+    <!-- PREVIEW BÊN TRÁI -->
     <div class="preview-section">
+        <p class="ai-warning">Giao diện xem trước. Khi mở trong MS Word khu vực này sẽ được ẩn.</p>
         <div class="paper-preview" id="paper-preview">
             <div class="pv-header">
                 <div class="pv-header-left" id="pv-w-left">
@@ -149,14 +165,21 @@
                 <div class="pv-line" style="width: 30%;"></div>
             </div>
 
-            <div style="font-size: 14px; text-indent: 30px; line-height: 1.5; color: #888;">
-                [Nội dung văn bản sẽ được AI tạo ở bước tiếp theo...]
+            <!-- PHẦN NỘI DUNG CHÍNH -->
+            <div id="pv-noi-dung" style="color: #ccc; min-height: 150px;">
+                <p class="pv-content-p">[Nội dung chi tiết của văn bản sẽ hiển thị tại đây...]</p>
             </div>
 
             <div class="pv-footer">
                 <div class="pv-header-left" style="text-align: left; width: 50%;">
                     <p style="font-size: 13px; font-weight: bold; font-style: italic;">Nơi nhận:</p>
-                    <div id="pv-noi-nhan" style="font-size: 12px;">
+                    <div id="pv-noi-nhan" style="font-size: 12px; margin-bottom: 5px;">
+                        <!-- Checkbox nơi nhận -->
+                    </div>
+                    <div id="pv-noi-nhan-khac" style="font-size: 12px; margin-bottom: 5px;">
+                        <!-- Nơi nhận tùy chỉnh gõ tay -->
+                    </div>
+                    <div style="font-size: 12px;">
                         <p>- Như trên;</p>
                         <p>- Lưu: VT;</p>
                     </div>
@@ -168,18 +191,18 @@
                 </div>
             </div>
         </div>
-        <p class="ai-warning">Giao diện xem trước. Khi chạy trong MS Word khu vực này sẽ được ẩn.</p>
     </div>
 
+    <!-- CONFIG BÊN PHẢI -->
     <div class="config-section">
         <div class="tabs">
-            <div class="tab active">1. Cấu hình Nghị định 30</div>
-            <div class="tab">2. AI Soạn thảo</div>
+            <div class="tab active" onclick="switchTab('tab-the-thuc', this)">1. Thể thức & Nội dung</div>
+            <div class="tab" onclick="switchTab('tab-ai', this)">2. AI Soạn thảo</div>
         </div>
 
-        <div class="form-content">
-            <h2 class="section-title">Thông tin Thể thức</h2>
-
+        <!-- TAB 1: THỂ THỨC VÀ NỘI DUNG -->
+        <div class="form-content active" id="tab-the-thuc">
+            
             <div class="row">
                 <div class="col">
                     <div class="form-group">
@@ -206,6 +229,12 @@
             <div class="form-group">
                 <label>Trích yếu nội dung</label>
                 <input type="text" class="form-control" id="inp-trich-yeu" placeholder="VD: V/v Nghỉ lễ Tết Nguyên đán 2026">
+            </div>
+
+            <!-- NỘI DUNG CHÍNH (MỚI THÊM) -->
+            <div class="form-group">
+                <label style="color: white; font-size: 13px;">Nội dung văn bản chi tiết</label>
+                <textarea class="form-control" id="inp-noi-dung" rows="8" placeholder="Nhập nội dung văn bản vào đây. Nhấn Enter để xuống dòng. Văn bản sẽ tự động được căn lề và thụt đầu dòng theo quy định..."></textarea>
             </div>
 
             <div class="fieldset-box" style="margin-top: 20px;">
@@ -245,12 +274,14 @@
                 </div>
             </div>
 
+            <!-- Slider Tỷ lệ Header -->
             <div class="slider-container">
                 <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 10px;">Tỷ lệ độ rộng tiêu đề (Trái/Phải)</label>
                 <input type="range" min="30" max="70" value="40" id="inp-slider">
                 <div class="slider-value" id="lbl-slider-val">40% / 60%</div>
             </div>
 
+            <!-- NƠI NHẬN -->
             <div class="form-group" style="margin-top: 20px;">
                 <label>Nơi nhận nội bộ (Tick chọn)</label>
                 <div class="row" style="gap: 10px; flex-wrap: wrap;">
@@ -261,6 +292,11 @@
                         <input type="checkbox" class="chk-noi-nhan" value="Các Phòng/Ban"> CÁC PHÒNG/BAN
                     </label>
                 </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Nơi nhận khác (Ngăn cách bởi dấu phẩy)</label>
+                <input type="text" class="form-control" id="inp-noi-nhan-khac" placeholder="VD: Sở Nội vụ, Sở Y tế...">
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
@@ -274,28 +310,62 @@
                     </div>
                 </div>
             </div>
-            
         </div>
 
+        <!-- TAB 2: AI SOẠN THẢO -->
+        <div class="form-content" id="tab-ai">
+            <h2 class="section-title">Trợ lý AI Viết văn bản</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
+                Nhập yêu cầu của bạn, AI sẽ tự động phân tích và viết nội dung văn bản với văn phong hành chính chuẩn mực.
+            </p>
+            
+            <div class="form-group">
+                <label style="color: white; font-size: 13px;">Bạn muốn viết văn bản gì?</label>
+                <textarea class="form-control" id="inp-ai-prompt" rows="6" placeholder="VD: Hãy viết cho tôi một thông báo về việc thay đổi thời gian làm việc mùa đông. Bắt đầu từ ngày 01/11, sáng làm từ 8h đến 12h, chiều từ 13h đến 17h. Yêu cầu toàn thể nhân viên tuân thủ nghiêm túc..."></textarea>
+            </div>
+
+            <button class="btn btn-ai" id="btn-run-ai" onclick="simulateAI()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>
+                <span id="ai-btn-text">Bắt đầu tạo văn bản</span>
+                <div class="spinner" id="ai-spinner"></div>
+            </button>
+            
+            <div id="ai-result-msg" style="display: none; margin-top: 15px; font-size: 13px; color: #10b981; text-align: center;">
+                ✔️ AI đã soạn thảo xong! Hãy sang tab "1. Thể thức" để kiểm tra và chỉnh sửa.
+            </div>
+        </div>
+
+        <!-- FOOTER: NÚT LƯU VÀ CHÈN -->
         <div class="footer-action">
-            <button class="btn-primary" id="btn-insert-word" onclick="insertIntoWord()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                Chèn Thể thức vào MS Word
+            <button class="btn btn-primary" id="btn-insert-word" onclick="insertIntoWord()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
+                Chèn trực tiếp vào MS Word
+            </button>
+            <button class="btn btn-secondary" onclick="exportToDocxFallback(true)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Tải xuống file Word (.doc)
             </button>
         </div>
     </div>
 
     <script>
-        // --- 1. KHỞI TẠO OFFICE ADD-IN ---
+        // --- CHUYỂN TAB ---
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-content').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // --- KHỞI TẠO OFFICE ADD-IN ---
         let isOfficeEnvironment = false;
         Office.onReady((info) => {
             if (info.host === Office.HostType.Word) {
                 isOfficeEnvironment = true;
-                document.getElementById('btn-insert-word').innerHTML = "📝 Viết cấu trúc vào tài liệu Word";
             }
         });
 
-        // --- 2. BINDING DỮ LIỆU SANG BẢN PREVIEW ---
+        // --- BINDING DỮ LIỆU SANG BẢN PREVIEW ---
         const bindInput = (inputId, previewId, defaultValue = "...") => {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -314,6 +384,18 @@
         bindInput('inp-trich-yeu', 'pv-trich-yeu', '...');
         bindInput('inp-chuc-vu', 'pv-chuc-vu', '[CHỨC VỤ]');
         bindInput('inp-ho-ten', 'pv-ho-ten', '[Họ và tên]');
+
+        // BINDING NỘI DUNG CHÍNH (Xử lý xuống dòng)
+        document.getElementById('inp-noi-dung').addEventListener('input', (e) => {
+            const lines = e.target.value.split('\n');
+            let html = '';
+            lines.forEach(line => {
+                if(line.trim() !== '') {
+                    html += `<p class="pv-content-p">${line}</p>`;
+                }
+            });
+            document.getElementById('pv-noi-dung').innerHTML = html || '<p class="pv-content-p" style="color:#ccc;">[Nội dung chi tiết của văn bản sẽ hiển thị tại đây...]</p>';
+        });
 
         document.getElementById('inp-ngay-ban-hanh').addEventListener('change', (e) => {
             if(e.target.value) {
@@ -336,19 +418,69 @@
             document.getElementById('pv-w-right').style.width = `${100 - e.target.value}%`;
         });
 
-        const chks = document.querySelectorAll('.chk-noi-nhan');
-        chks.forEach(chk => {
-            chk.addEventListener('change', () => {
-                let html = '';
-                chks.forEach(c => { if(c.checked) html += `<p>- ${c.value};</p>`; });
-                html += `<p>- Như trên;</p><p>- Lưu: VT;</p>`;
-                document.getElementById('pv-noi-nhan').innerHTML = html;
+        // XỬ LÝ NƠI NHẬN
+        function updateNoiNhan() {
+            let html = '';
+            // Nơi nhận tick chọn
+            document.querySelectorAll('.chk-noi-nhan').forEach(c => {
+                if(c.checked) html += `<p>- ${c.value};</p>`;
             });
-        });
+            document.getElementById('pv-noi-nhan').innerHTML = html;
 
-        // --- 3. HÀM CHÈN VÀO MS WORD ---
-        async function insertIntoWord() {
-            // Lấy dữ liệu
+            // Nơi nhận gõ tay
+            let htmlKhac = '';
+            const inputKhac = document.getElementById('inp-noi-nhan-khac').value;
+            if(inputKhac.trim() !== '') {
+                const list = inputKhac.split(',');
+                list.forEach(item => {
+                    if(item.trim() !== '') htmlKhac += `<p>- ${item.trim()};</p>`;
+                });
+            }
+            document.getElementById('pv-noi-nhan-khac').innerHTML = htmlKhac;
+        }
+
+        document.querySelectorAll('.chk-noi-nhan').forEach(chk => chk.addEventListener('change', updateNoiNhan));
+        document.getElementById('inp-noi-nhan-khac').addEventListener('input', updateNoiNhan);
+
+
+        // --- CHỨC NĂNG GIẢ LẬP AI (TAB 2) ---
+        function simulateAI() {
+            const prompt = document.getElementById('inp-ai-prompt').value;
+            if(!prompt.trim()) {
+                alert("Vui lòng nhập yêu cầu cho AI!");
+                return;
+            }
+
+            // Hiệu ứng loading
+            document.getElementById('ai-btn-text').innerText = "AI đang soạn thảo...";
+            document.getElementById('ai-spinner').style.display = "block";
+            document.getElementById('ai-result-msg').style.display = "none";
+            document.getElementById('btn-run-ai').disabled = true;
+
+            // Giả lập thời gian chờ gọi API (2 giây)
+            setTimeout(() => {
+                // Điền dữ liệu giả lập vào Tab 1
+                document.getElementById('inp-trich-yeu').value = "Thay đổi thời gian làm việc mùa đông";
+                document.getElementById('pv-trich-yeu').innerText = "Thay đổi thời gian làm việc mùa đông";
+                
+                const aiText = "Căn cứ Bộ luật Lao động năm 2019;\nCăn cứ Tình hình thời tiết thực tế và để đảm bảo sức khỏe cho toàn thể cán bộ, nhân viên;\nGiám đốc công ty thông báo về việc thay đổi thời gian làm việc mùa đông như sau:\n\n1. Thời gian áp dụng: Bắt đầu từ ngày 01/11/2026 đến khi có thông báo mới.\n2. Khung giờ làm việc mới:\n- Buổi sáng: Từ 08h00 đến 12h00.\n- Buổi chiều: Từ 13h00 đến 17h00.\n3. Yêu cầu toàn thể Trưởng các Phòng/Ban thông báo đến toàn bộ nhân viên trực thuộc và tổ chức thực hiện nghiêm túc quy định này.";
+                
+                const ndInput = document.getElementById('inp-noi-dung');
+                ndInput.value = aiText;
+                // Kích hoạt sự kiện input để render ra màn hình preview
+                ndInput.dispatchEvent(new Event('input'));
+
+                // Tắt hiệu ứng
+                document.getElementById('ai-btn-text').innerText = "Tạo lại văn bản";
+                document.getElementById('ai-spinner').style.display = "none";
+                document.getElementById('btn-run-ai').disabled = false;
+                document.getElementById('ai-result-msg').style.display = "block";
+
+            }, 2000);
+        }
+
+        // --- HÀM TẠO HTML ĐỂ LƯU HOẶC CHÈN ---
+        function generateDocumentHTML() {
             const cqChuQuan = document.getElementById('inp-cq-chu-quan').value.toUpperCase() || '[CƠ QUAN CHỦ QUẢN]';
             const cqBanHanh = document.getElementById('inp-cq-ban-hanh').value.toUpperCase() || '[CƠ QUAN BAN HÀNH]';
             const soThuTu = document.getElementById('inp-so-thu-tu').value || '01';
@@ -370,12 +502,29 @@
             const wLeft = document.getElementById('inp-slider').value;
             const wRight = 100 - wLeft;
 
+            // Nơi nhận
             let noiNhanHtml = '';
             document.querySelectorAll('.chk-noi-nhan:checked').forEach(c => {
                 noiNhanHtml += `<div style="margin: 0;">- ${c.value};</div>`;
             });
+            const inputKhac = document.getElementById('inp-noi-nhan-khac').value;
+            if(inputKhac.trim() !== '') {
+                inputKhac.split(',').forEach(item => {
+                    if(item.trim() !== '') noiNhanHtml += `<div style="margin: 0;">- ${item.trim()};</div>`;
+                });
+            }
 
-            // Nếu là Công văn thì ẩn Tên Loại, ẩn mã CV ở số ký hiệu
+            // Xử lý Nội dung chính (Thêm tag p và text-indent)
+            let noiDungHtml = '';
+            const lines = document.getElementById('inp-noi-dung').value.split('\n');
+            lines.forEach(line => {
+                if(line.trim() !== '') {
+                    noiDungHtml += `<div style="text-indent: 1cm; text-align: justify; margin-bottom: 6pt;">${line}</div>`;
+                }
+            });
+            if(noiDungHtml === '') noiDungHtml = `<div style="text-indent: 1cm;">[Nhập nội dung văn bản tại đây...]</div>`;
+
+            // Tiêu đề (Công văn khác với Thông báo/Quyết định)
             let soKyHieu = `${soThuTu}/${maLoai}-${maDv}`;
             let tieuDeHtml = `
                 <div style="text-align: center; font-family: 'Times New Roman';">
@@ -385,11 +534,11 @@
                 
             if (maLoai === 'CV') {
                 soKyHieu = `${soThuTu}/${maDv}`;
-                tieuDeHtml = `<div style="font-family: 'Times New Roman'; font-size: 14pt; margin-left: 30px;"><b>Kính gửi:</b> ....................................</div><br>`;
+                tieuDeHtml = `<div style="font-family: 'Times New Roman'; font-size: 14pt; margin-left: 1cm;"><b>Kính gửi:</b> ....................................</div><br>`;
             }
 
-            // HTML tương thích cho Word
-            const htmlToInsert = `
+            // HTML GHÉP CHUẨN ĐỂ XUẤT RA WORD
+            return `
                 <table style="width: 100%; font-family: 'Times New Roman'; font-size: 13pt; border-collapse: collapse;">
                     <tr>
                         <td style="width: ${wLeft}%; text-align: center; vertical-align: top;">
@@ -409,8 +558,8 @@
                 <br>
                 ${tieuDeHtml}
                 <br>
-                <div style="font-family: 'Times New Roman'; font-size: 14pt; text-indent: 30px; text-align: justify;">
-                    [Nhập nội dung văn bản tại đây...]
+                <div style="font-family: 'Times New Roman'; font-size: 14pt;">
+                    ${noiDungHtml}
                 </div>
                 <br><br>
                 <table style="width: 100%; font-family: 'Times New Roman'; font-size: 13pt; border-collapse: collapse;">
@@ -420,7 +569,7 @@
                             <div style="font-size: 11pt;">
                                 ${noiNhanHtml}
                                 <div style="margin: 0;">- Như trên;</div>
-                                <div style="margin: 0;">- Lưu: VT, ...</div>
+                                <div style="margin: 0;">- Lưu: VT.</div>
                             </div>
                         </td>
                         <td style="width: 50%; text-align: center; vertical-align: top;">
@@ -431,8 +580,11 @@
                     </tr>
                 </table>
             `;
+        }
 
-            // Gọi API chèn của Word
+        // --- HÀM 1: CHÈN VÀO MS WORD ---
+        async function insertIntoWord() {
+            const htmlToInsert = generateDocumentHTML();
             if (isOfficeEnvironment) {
                 try {
                     await Word.run(async (context) => {
@@ -444,11 +596,13 @@
                     console.error("Lỗi:", error);
                 }
             } else {
-                exportToDocxFallback(htmlToInsert);
+                alert("Nút này chỉ hoạt động khi bạn mở công cụ này bên trong phần mềm MS Word (Add-in). Nếu bạn đang mở trên Web, vui lòng dùng nút 'Tải xuống file Word' ở bên dưới.");
             }
         }
 
-        function exportToDocxFallback(content) {
+        // --- HÀM 2: TẢI FILE .DOC VỀ MÁY ---
+        function exportToDocxFallback(isButtonTriggered = false) {
+            const content = generateDocumentHTML();
             const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>";
             const footer = "</body></html>";
             const sourceHTML = header + content + footer;
@@ -457,10 +611,11 @@
             const fileDownload = document.createElement("a");
             document.body.appendChild(fileDownload);
             fileDownload.href = source;
-            fileDownload.download = 'Van_Ban_Mau.doc';
+            fileDownload.download = 'Van_Ban_Hanh_Chinh_AI.doc';
             fileDownload.click();
             document.body.removeChild(fileDownload);
-            alert("Đã tải xuống file .doc thành công!");
+            
+            if(isButtonTriggered) alert("Đã tải xuống file Word thành công!");
         }
     </script>
 </body>
