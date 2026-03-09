@@ -55,7 +55,8 @@
             background-color: #1a1a1a;
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            padding: 50px 60px;
+            /* Căn lề mô phỏng chuẩn Nghị định 30: Trái 3cm (khoảng 60px), Phải/Trên/Dưới 2cm (khoảng 40px) */
+            padding: 40px 40px 40px 60px;
             color: var(--text-main);
             font-family: 'Times New Roman', serif;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -402,7 +403,7 @@
         bindInput('inp-chuc-vu', 'pv-chuc-vu', '[CHỨC VỤ]');
         bindInput('inp-ho-ten', 'pv-ho-ten', '[Họ và tên]');
 
-        // --- CẬP NHẬT CHUẨN KÝ HIỆU (SỐ: 01/TB-BGDĐT) ---
+        // --- CẬP NHẬT CHUẨN KÝ HIỆU ---
         function updateSoKyHieu() {
             const loai = document.getElementById('inp-loai-vb').value;
             const tenLoai = document.getElementById('inp-loai-vb').options[document.getElementById('inp-loai-vb').selectedIndex].text;
@@ -411,18 +412,15 @@
             
             let chuoiKyHieu = '';
             
-            // Theo Nghị định 30: Công văn không có mã Loại văn bản
             if (loai === 'CV') {
                 chuoiKyHieu = `Số: ${so}/${ma || '...'}`;
             } else {
                 chuoiKyHieu = `Số: ${so}/${loai}${ma ? '-' + ma : ''}`;
             }
 
-            // Hiển thị lên UI Preview & Bảng Đỏ
             document.getElementById('pv-so-ky-hieu').innerText = chuoiKyHieu;
             document.getElementById('lbl-live-ky-hieu').innerText = `Ký hiệu tạo ra: ${chuoiKyHieu}`;
             
-            // Xử lý tiêu đề bên Preview (Công văn không có tên loại to ở giữa)
             if (loai === 'CV') {
                 document.getElementById('pv-khu-vuc-tieu-de').innerHTML = `<p style="font-size: 14px; margin-left: 20px;"><b>Kính gửi:</b> ....................................</p><p style="font-size: 14px; margin-left: 20px;">V/v <span id="pv-trich-yeu">${document.getElementById('inp-trich-yeu').value || '...'}</span></p>`;
             } else {
@@ -483,7 +481,6 @@
 
         document.querySelectorAll('.chk-noi-nhan').forEach(chk => chk.addEventListener('change', updateNoiNhan));
         document.getElementById('inp-noi-nhan-khac').addEventListener('input', updateNoiNhan);
-
 
         // --- CHỨC NĂNG GIẢ LẬP AI ---
         function simulateAI() {
@@ -618,8 +615,27 @@
             if (isOfficeEnvironment) {
                 try {
                     await Word.run(async (context) => {
+                        // 1. Chèn nội dung văn bản
                         const range = context.document.getSelection();
                         range.insertHtml(htmlToInsert, Word.InsertLocation.replace);
+
+                        // 2. Cài đặt Căn lề Khổ A4 theo Nghị định 30 (Trên 2, Dưới 2, Trái 3, Phải 2)
+                        // Lấy cấu hình trang hiện tại
+                        const sections = context.document.sections;
+                        context.load(sections);
+                        await context.sync();
+
+                        if (sections.items.length > 0) {
+                            const pageSetup = sections.items[0].pageSetup;
+                            pageSetup.paperSize = Word.PaperSize.a4;
+                            
+                            // Định dạng lề bằng Point (1 cm = 28.35 pt)
+                            pageSetup.topMargin = 56.7;    // 2.0 cm
+                            pageSetup.bottomMargin = 56.7; // 2.0 cm
+                            pageSetup.leftMargin = 85.05;  // 3.0 cm
+                            pageSetup.rightMargin = 56.7;  // 2.0 cm
+                        }
+
                         await context.sync();
                     });
                 } catch (error) {
@@ -632,8 +648,25 @@
 
         function exportToDocxFallback(isButtonTriggered = false) {
             const content = generateDocumentHTML();
-            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>";
-            const footer = "</body></html>";
+            // Khai báo khổ giấy và Lề trong CSS của Word khi tải xuống
+            const header = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset='utf-8'>
+                <style>
+                    @page WordSection1 {
+                        size: 595.3pt 841.9pt; /* Kích thước A4 */
+                        margin: 2.0cm 2.0cm 2.0cm 3.0cm; /* Lề: Trên 2, Phải 2, Dưới 2, Trái 3 */
+                        mso-header-margin: 35.4pt;
+                        mso-footer-margin: 35.4pt;
+                        mso-paper-source: 0;
+                    }
+                    div.WordSection1 { page: WordSection1; }
+                </style>
+            </head>
+            <body><div class="WordSection1">`;
+            
+            const footer = "</div></body></html>";
             const sourceHTML = header + content + footer;
             
             const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
