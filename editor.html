@@ -128,6 +128,8 @@
         .btn-ai { background-color: var(--accent-blue); padding: 14px; font-size: 14px; margin-top: 10px; }
         .btn-ai:hover { background-color: var(--accent-blue-hover); }
 
+        .live-preview-box { background: #2d1b1b; border: 1px dashed var(--accent-red); padding: 10px; border-radius: 4px; margin-top: 5px; text-align: center; color: #fca5a5; font-size: 14px; font-weight: bold; }
+
         /* Loading Spinner */
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 16px; height: 16px; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -149,7 +151,7 @@
                     <p style="font-size: 14px; text-transform: uppercase;" id="pv-cq-chu-quan">[CƠ QUAN CHỦ QUẢN]</p>
                     <p style="font-size: 14px; font-weight: bold; text-transform: uppercase;" id="pv-cq-ban-hanh">[CƠ QUAN BAN HÀNH]</p>
                     <div class="pv-line" style="width: 40%;"></div>
-                    <p style="font-size: 14px; margin-top: 5px;">Số: <span id="pv-so-thu-tu">01</span>/<span id="pv-ma-loai">TB</span>-<span id="pv-ma-dv">XXX</span></p>
+                    <p style="font-size: 14px; margin-top: 5px;" id="pv-so-ky-hieu">Số: .../TB-XXX</p>
                 </div>
                 <div class="pv-header-right" id="pv-w-right">
                     <p style="font-size: 14px; font-weight: bold; text-transform: uppercase;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
@@ -159,7 +161,7 @@
                 </div>
             </div>
 
-            <div class="pv-title">
+            <div class="pv-title" id="pv-khu-vuc-tieu-de">
                 <h2 style="font-size: 18px; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;" id="pv-ten-loai">THÔNG BÁO</h2>
                 <p style="font-size: 14px; font-weight: bold;">Về việc <span id="pv-trich-yeu">...</span></p>
                 <div class="pv-line" style="width: 30%;"></div>
@@ -203,55 +205,77 @@
         <!-- TAB 1: THỂ THỨC VÀ NỘI DUNG -->
         <div class="form-content active" id="tab-the-thuc">
             
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
-                        <label>Loại văn bản</label>
-                        <select class="form-control" id="inp-loai-vb">
-                            <option value="TB">THÔNG BÁO</option>
-                            <option value="QĐ">QUYẾT ĐỊNH</option>
-                            <option value="CV">CÔNG VĂN</option>
-                            <option value="TTr">TỜ TRÌNH</option>
-                            <option value="BC">BÁO CÁO</option>
-                            <option value="KH">KẾ HOẠCH</option>
-                            <option value="GM">GIẤY MỜI</option>
-                        </select>
+            <div class="fieldset-box" style="margin-top: 10px;">
+                <div class="fieldset-title">Loại văn bản & Số, Ký hiệu</div>
+                
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Loại văn bản (Theo Nghị định 30)</label>
+                    <select class="form-control" id="inp-loai-vb">
+                        <option value="NQ">Nghị quyết (Cá biệt)</option>
+                        <option value="QĐ">Quyết định (Cá biệt)</option>
+                        <option value="CT">Chỉ thị</option>
+                        <option value="QC">Quy chế</option>
+                        <option value="QĐinh">Quy định</option>
+                        <option value="TB" selected>Thông báo</option>
+                        <option value="HD">Hướng dẫn</option>
+                        <option value="CTr">Chương trình</option>
+                        <option value="KH">Kế hoạch</option>
+                        <option value="PA">Phương án</option>
+                        <option value="ĐA">Đề án</option>
+                        <option value="DA">Dự án</option>
+                        <option value="BC">Báo cáo</option>
+                        <option value="BB">Biên bản</option>
+                        <option value="TTr">Tờ trình</option>
+                        <option value="HĐ">Hợp đồng</option>
+                        <option value="CĐ">Công điện</option>
+                        <option value="BMT">Bản ghi nhớ / Bản thỏa thuận</option>
+                        <option value="GUQ">Giấy ủy quyền</option>
+                        <option value="GM">Giấy mời</option>
+                        <option value="GGT">Giấy giới thiệu</option>
+                        <option value="GNP">Giấy nghỉ phép</option>
+                        <option value="PC">Phiếu chuyển</option>
+                        <option value="PGQ">Phiếu giải quyết</option>
+                        <option value="TC">Thư công</option>
+                        <option value="CV">Công văn</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Số thứ tự văn bản</label>
+                            <input type="text" class="form-control" id="inp-so-thu-tu" placeholder="VD: 01" value="01">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Ký hiệu Đơn vị ban hành</label>
+                            <input type="text" class="form-control" id="inp-ma-dv" placeholder="VD: BGDĐT, UBND...">
+                        </div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="form-group">
-                        <label>Số thứ tự</label>
-                        <input type="text" class="form-control" id="inp-so-thu-tu" placeholder="VD: 01" value="01">
-                    </div>
+
+                <!-- Bảng hiển thị trước kết quả ghép -->
+                <div class="live-preview-box" id="lbl-live-ky-hieu">
+                    Ký hiệu tạo ra: Số: 01/TB-XXX
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Trích yếu nội dung</label>
-                <input type="text" class="form-control" id="inp-trich-yeu" placeholder="VD: V/v Nghỉ lễ Tết Nguyên đán 2026">
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Trích yếu nội dung (Về việc...)</label>
+                <input type="text" class="form-control" id="inp-trich-yeu" placeholder="VD: V/v Nghỉ lễ Tết Nguyên đán">
             </div>
 
-            <!-- NỘI DUNG CHÍNH (MỚI THÊM) -->
             <div class="form-group">
-                <label style="color: white; font-size: 13px;">Nội dung văn bản chi tiết</label>
+                <label style="color: white; font-size: 13px;">Nội dung chi tiết</label>
                 <textarea class="form-control" id="inp-noi-dung" rows="8" placeholder="Nhập nội dung văn bản vào đây. Nhấn Enter để xuống dòng. Văn bản sẽ tự động được căn lề và thụt đầu dòng theo quy định..."></textarea>
             </div>
 
             <div class="fieldset-box" style="margin-top: 20px;">
-                <div class="fieldset-title">Đơn vị ban hành</div>
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label>Cơ quan chủ quản</label>
-                            <input type="text" class="form-control" id="inp-cq-chu-quan" placeholder="VD: BỘ GIÁO DỤC VÀ ĐÀO TẠO">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label>Ký hiệu đơn vị</label>
-                            <input type="text" class="form-control" id="inp-ma-dv" placeholder="VD: BGDĐT">
-                        </div>
-                    </div>
+                <div class="fieldset-title">Tên Đơn vị ban hành</div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Cơ quan chủ quản (Cấp trên - nếu có)</label>
+                    <input type="text" class="form-control" id="inp-cq-chu-quan" placeholder="VD: BỘ GIÁO DỤC VÀ ĐÀO TẠO">
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Tên cơ quan ban hành</label>
@@ -274,7 +298,6 @@
                 </div>
             </div>
 
-            <!-- Slider Tỷ lệ Header -->
             <div class="slider-container">
                 <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 10px;">Tỷ lệ độ rộng tiêu đề (Trái/Phải)</label>
                 <input type="range" min="30" max="70" value="40" id="inp-slider">
@@ -321,7 +344,7 @@
             
             <div class="form-group">
                 <label style="color: white; font-size: 13px;">Bạn muốn viết văn bản gì?</label>
-                <textarea class="form-control" id="inp-ai-prompt" rows="6" placeholder="VD: Hãy viết cho tôi một thông báo về việc thay đổi thời gian làm việc mùa đông. Bắt đầu từ ngày 01/11, sáng làm từ 8h đến 12h, chiều từ 13h đến 17h. Yêu cầu toàn thể nhân viên tuân thủ nghiêm túc..."></textarea>
+                <textarea class="form-control" id="inp-ai-prompt" rows="6" placeholder="VD: Hãy viết cho tôi một thông báo về việc thay đổi thời gian làm việc mùa đông. Bắt đầu từ ngày 01/11, sáng làm từ 8h đến 12h, chiều từ 13h đến 17h..."></textarea>
             </div>
 
             <button class="btn btn-ai" id="btn-run-ai" onclick="simulateAI()">
@@ -357,15 +380,11 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // --- KHỞI TẠO OFFICE ADD-IN ---
         let isOfficeEnvironment = false;
         Office.onReady((info) => {
-            if (info.host === Office.HostType.Word) {
-                isOfficeEnvironment = true;
-            }
+            if (info.host === Office.HostType.Word) isOfficeEnvironment = true;
         });
 
-        // --- BINDING DỮ LIỆU SANG BẢN PREVIEW ---
         const bindInput = (inputId, previewId, defaultValue = "...") => {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -378,12 +397,43 @@
 
         bindInput('inp-cq-chu-quan', 'pv-cq-chu-quan', '[CƠ QUAN CHỦ QUẢN]');
         bindInput('inp-cq-ban-hanh', 'pv-cq-ban-hanh', '[CƠ QUAN BAN HÀNH]');
-        bindInput('inp-ma-dv', 'pv-ma-dv', 'XXX');
-        bindInput('inp-so-thu-tu', 'pv-so-thu-tu', '01');
         bindInput('inp-dia-danh', 'pv-dia-danh', '[Địa danh]');
         bindInput('inp-trich-yeu', 'pv-trich-yeu', '...');
         bindInput('inp-chuc-vu', 'pv-chuc-vu', '[CHỨC VỤ]');
         bindInput('inp-ho-ten', 'pv-ho-ten', '[Họ và tên]');
+
+        // --- CẬP NHẬT CHUẨN KÝ HIỆU (SỐ: 01/TB-BGDĐT) ---
+        function updateSoKyHieu() {
+            const loai = document.getElementById('inp-loai-vb').value;
+            const tenLoai = document.getElementById('inp-loai-vb').options[document.getElementById('inp-loai-vb').selectedIndex].text;
+            const so = document.getElementById('inp-so-thu-tu').value || '...';
+            let ma = document.getElementById('inp-ma-dv').value.toUpperCase();
+            
+            let chuoiKyHieu = '';
+            
+            // Theo Nghị định 30: Công văn không có mã Loại văn bản
+            if (loai === 'CV') {
+                chuoiKyHieu = `Số: ${so}/${ma || '...'}`;
+            } else {
+                chuoiKyHieu = `Số: ${so}/${loai}${ma ? '-' + ma : ''}`;
+            }
+
+            // Hiển thị lên UI Preview & Bảng Đỏ
+            document.getElementById('pv-so-ky-hieu').innerText = chuoiKyHieu;
+            document.getElementById('lbl-live-ky-hieu').innerText = `Ký hiệu tạo ra: ${chuoiKyHieu}`;
+            
+            // Xử lý tiêu đề bên Preview (Công văn không có tên loại to ở giữa)
+            if (loai === 'CV') {
+                document.getElementById('pv-khu-vuc-tieu-de').innerHTML = `<p style="font-size: 14px; margin-left: 20px;"><b>Kính gửi:</b> ....................................</p><p style="font-size: 14px; margin-left: 20px;">V/v <span id="pv-trich-yeu">${document.getElementById('inp-trich-yeu').value || '...'}</span></p>`;
+            } else {
+                document.getElementById('pv-khu-vuc-tieu-de').innerHTML = `<h2 style="font-size: 18px; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;" id="pv-ten-loai">${tenLoai}</h2><p style="font-size: 14px; font-weight: bold;">Về việc <span id="pv-trich-yeu">${document.getElementById('inp-trich-yeu').value || '...'}</span></p><div class="pv-line" style="width: 30%;"></div>`;
+            }
+        }
+
+        document.getElementById('inp-loai-vb').addEventListener('change', updateSoKyHieu);
+        document.getElementById('inp-so-thu-tu').addEventListener('input', updateSoKyHieu);
+        document.getElementById('inp-ma-dv').addEventListener('input', updateSoKyHieu);
+        document.getElementById('inp-trich-yeu').addEventListener('input', updateSoKyHieu);
 
         // BINDING NỘI DUNG CHÍNH (Xử lý xuống dòng)
         document.getElementById('inp-noi-dung').addEventListener('input', (e) => {
@@ -406,11 +456,6 @@
             }
         });
 
-        document.getElementById('inp-loai-vb').addEventListener('change', (e) => {
-            document.getElementById('pv-ma-loai').innerText = e.target.value;
-            document.getElementById('pv-ten-loai').innerText = e.target.options[e.target.selectedIndex].text;
-        });
-
         const slider = document.getElementById('inp-slider');
         slider.addEventListener('input', (e) => {
             document.getElementById('lbl-slider-val').innerText = `${e.target.value}% / ${100 - e.target.value}%`;
@@ -421,18 +466,15 @@
         // XỬ LÝ NƠI NHẬN
         function updateNoiNhan() {
             let html = '';
-            // Nơi nhận tick chọn
             document.querySelectorAll('.chk-noi-nhan').forEach(c => {
                 if(c.checked) html += `<p>- ${c.value};</p>`;
             });
             document.getElementById('pv-noi-nhan').innerHTML = html;
 
-            // Nơi nhận gõ tay
             let htmlKhac = '';
             const inputKhac = document.getElementById('inp-noi-nhan-khac').value;
             if(inputKhac.trim() !== '') {
-                const list = inputKhac.split(',');
-                list.forEach(item => {
+                inputKhac.split(',').forEach(item => {
                     if(item.trim() !== '') htmlKhac += `<p>- ${item.trim()};</p>`;
                 });
             }
@@ -443,39 +485,29 @@
         document.getElementById('inp-noi-nhan-khac').addEventListener('input', updateNoiNhan);
 
 
-        // --- CHỨC NĂNG GIẢ LẬP AI (TAB 2) ---
+        // --- CHỨC NĂNG GIẢ LẬP AI ---
         function simulateAI() {
             const prompt = document.getElementById('inp-ai-prompt').value;
-            if(!prompt.trim()) {
-                alert("Vui lòng nhập yêu cầu cho AI!");
-                return;
-            }
+            if(!prompt.trim()) { alert("Vui lòng nhập yêu cầu cho AI!"); return; }
 
-            // Hiệu ứng loading
             document.getElementById('ai-btn-text').innerText = "AI đang soạn thảo...";
             document.getElementById('ai-spinner').style.display = "block";
             document.getElementById('ai-result-msg').style.display = "none";
             document.getElementById('btn-run-ai').disabled = true;
 
-            // Giả lập thời gian chờ gọi API (2 giây)
             setTimeout(() => {
-                // Điền dữ liệu giả lập vào Tab 1
                 document.getElementById('inp-trich-yeu').value = "Thay đổi thời gian làm việc mùa đông";
-                document.getElementById('pv-trich-yeu').innerText = "Thay đổi thời gian làm việc mùa đông";
-                
                 const aiText = "Căn cứ Bộ luật Lao động năm 2019;\nCăn cứ Tình hình thời tiết thực tế và để đảm bảo sức khỏe cho toàn thể cán bộ, nhân viên;\nGiám đốc công ty thông báo về việc thay đổi thời gian làm việc mùa đông như sau:\n\n1. Thời gian áp dụng: Bắt đầu từ ngày 01/11/2026 đến khi có thông báo mới.\n2. Khung giờ làm việc mới:\n- Buổi sáng: Từ 08h00 đến 12h00.\n- Buổi chiều: Từ 13h00 đến 17h00.\n3. Yêu cầu toàn thể Trưởng các Phòng/Ban thông báo đến toàn bộ nhân viên trực thuộc và tổ chức thực hiện nghiêm túc quy định này.";
                 
                 const ndInput = document.getElementById('inp-noi-dung');
                 ndInput.value = aiText;
-                // Kích hoạt sự kiện input để render ra màn hình preview
                 ndInput.dispatchEvent(new Event('input'));
+                updateSoKyHieu();
 
-                // Tắt hiệu ứng
                 document.getElementById('ai-btn-text').innerText = "Tạo lại văn bản";
                 document.getElementById('ai-spinner').style.display = "none";
                 document.getElementById('btn-run-ai').disabled = false;
                 document.getElementById('ai-result-msg').style.display = "block";
-
             }, 2000);
         }
 
@@ -485,7 +517,7 @@
             const cqBanHanh = document.getElementById('inp-cq-ban-hanh').value.toUpperCase() || '[CƠ QUAN BAN HÀNH]';
             const soThuTu = document.getElementById('inp-so-thu-tu').value || '01';
             const maLoai = document.getElementById('inp-loai-vb').value;
-            const maDv = document.getElementById('inp-ma-dv').value.toUpperCase() || 'XXX';
+            const maDv = document.getElementById('inp-ma-dv').value.toUpperCase();
             const diaDanh = document.getElementById('inp-dia-danh').value || '.......';
             
             let ngay = '...', thang = '...', nam = '202...';
@@ -502,7 +534,6 @@
             const wLeft = document.getElementById('inp-slider').value;
             const wRight = 100 - wLeft;
 
-            // Nơi nhận
             let noiNhanHtml = '';
             document.querySelectorAll('.chk-noi-nhan:checked').forEach(c => {
                 noiNhanHtml += `<div style="margin: 0;">- ${c.value};</div>`;
@@ -514,30 +545,31 @@
                 });
             }
 
-            // Xử lý Nội dung chính (Thêm tag p và text-indent)
             let noiDungHtml = '';
             const lines = document.getElementById('inp-noi-dung').value.split('\n');
             lines.forEach(line => {
-                if(line.trim() !== '') {
-                    noiDungHtml += `<div style="text-indent: 1cm; text-align: justify; margin-bottom: 6pt;">${line}</div>`;
-                }
+                if(line.trim() !== '') noiDungHtml += `<div style="text-indent: 1cm; text-align: justify; margin-bottom: 6pt;">${line}</div>`;
             });
             if(noiDungHtml === '') noiDungHtml = `<div style="text-indent: 1cm;">[Nhập nội dung văn bản tại đây...]</div>`;
 
-            // Tiêu đề (Công văn khác với Thông báo/Quyết định)
-            let soKyHieu = `${soThuTu}/${maLoai}-${maDv}`;
-            let tieuDeHtml = `
-                <div style="text-align: center; font-family: 'Times New Roman';">
-                    <b><span style="font-size: 14pt; text-transform: uppercase;">${tenLoai}</span></b><br>
-                    <b><span style="font-size: 14pt;">Về việc ${trichYeu.replace(/^V\/v\s*/i, '')}</span></b>
-                </div>`;
-                
+            // Xử lý Số Ký Hiệu chuẩn
+            let soKyHieu = '';
+            let tieuDeHtml = '';
+            
             if (maLoai === 'CV') {
-                soKyHieu = `${soThuTu}/${maDv}`;
-                tieuDeHtml = `<div style="font-family: 'Times New Roman'; font-size: 14pt; margin-left: 1cm;"><b>Kính gửi:</b> ....................................</div><br>`;
+                soKyHieu = `Số: ${soThuTu}/${maDv || '...'}`;
+                tieuDeHtml = `
+                    <div style="font-family: 'Times New Roman'; font-size: 14pt; margin-left: 1cm;"><b>Kính gửi:</b> ....................................</div>
+                    <div style="font-family: 'Times New Roman'; font-size: 14pt; margin-left: 1cm;">V/v ${trichYeu.replace(/^V\/v\s*/i, '')}</div><br>`;
+            } else {
+                soKyHieu = `Số: ${soThuTu}/${maLoai}${maDv ? '-' + maDv : ''}`;
+                tieuDeHtml = `
+                    <div style="text-align: center; font-family: 'Times New Roman';">
+                        <b><span style="font-size: 14pt; text-transform: uppercase;">${tenLoai}</span></b><br>
+                        <b><span style="font-size: 14pt;">Về việc ${trichYeu.replace(/^V\/v\s*/i, '')}</span></b>
+                    </div><br>`;
             }
 
-            // HTML GHÉP CHUẨN ĐỂ XUẤT RA WORD
             return `
                 <table style="width: 100%; font-family: 'Times New Roman'; font-size: 13pt; border-collapse: collapse;">
                     <tr>
@@ -545,7 +577,7 @@
                             <span style="font-size: 12pt;">${cqChuQuan}</span><br>
                             <b>${cqBanHanh}</b><br>
                             <hr style="width: 30%; border: 1px solid black; margin-top: 5px; margin-bottom: 5px;">
-                            Số: ${soKyHieu}
+                            ${soKyHieu}
                         </td>
                         <td style="width: ${wRight}%; text-align: center; vertical-align: top;">
                             <b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b><br>
@@ -557,7 +589,6 @@
                 </table>
                 <br>
                 ${tieuDeHtml}
-                <br>
                 <div style="font-family: 'Times New Roman'; font-size: 14pt;">
                     ${noiDungHtml}
                 </div>
@@ -582,7 +613,6 @@
             `;
         }
 
-        // --- HÀM 1: CHÈN VÀO MS WORD ---
         async function insertIntoWord() {
             const htmlToInsert = generateDocumentHTML();
             if (isOfficeEnvironment) {
@@ -600,7 +630,6 @@
             }
         }
 
-        // --- HÀM 2: TẢI FILE .DOC VỀ MÁY ---
         function exportToDocxFallback(isButtonTriggered = false) {
             const content = generateDocumentHTML();
             const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>";
@@ -616,6 +645,11 @@
             document.body.removeChild(fileDownload);
             
             if(isButtonTriggered) alert("Đã tải xuống file Word thành công!");
+        }
+
+        // Gọi cập nhật 1 lần lúc trang web vừa load xong
+        window.onload = function() {
+            updateSoKyHieu();
         }
     </script>
 </body>
